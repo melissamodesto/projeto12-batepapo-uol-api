@@ -17,26 +17,22 @@ mongoClient.connect().then(() => {
   db = mongoClient.db("batepapoUol");
 });
 
-server.get("/participants", (req, res) => {
-  db.collection("participants")
-    .find()
-    .toArray()
-    .then((data) => {
-      res.status(200).send(data);
-    });
+server.get("/participants", async (req, res) => {
+  const response = await db.collection("participants").find().toArray();
+  res.send(response);
 });
 
-server.post("/participants", (req, res) => {
+server.post("/participants", async (req, res) => {
   const { name } = req.body;
 
-  if (!name || name.length === 0) {
+  if (!name) {
     res.status(400).send("Nome de usuário é obrigatório");
-  } else {
-
-      db.collection("participants").insertOne({ name });
-      res.status(201).send("Login realizado com sucesso");
   }
+  const response = await db
+    .collection("participants")
+    .insertOne({ name, lastStatus: Date.now() });
 
+  res.status(201).send(`Login realizado com sucesso. Bem-vindo(a), ${name}!`);
 });
 
 server.listen(5000, () => console.log(chalk.yellow("listening on port 5000")));
