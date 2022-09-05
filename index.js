@@ -158,4 +158,49 @@ server.post("/messages", async (req, res) => {
   }
 });
 
+server.post("/status", async (req, res) => {
+  const { user } = req.headers;
+
+  const foundUser = await db.collection("users").findOne({ name: user });
+  console.log(foundUser);
+
+  if (!foundUser) {
+    res.sendStatus(404);
+    return;
+  }
+
+  await db.collection("users").updateOne(
+    {
+      name: user,
+    },
+    { $set: { lastStatus: Date.now() } }
+  );
+
+  res.send(200);
+});
+
+setInterval(async () => {
+  const now = Date.now() - 10000;
+  
+  const removeUsers = await db
+    .collection("participants")
+    .find({ lastStatus: { $lt: now } })
+    .toArray();
+  
+    if (removeUsers.length > 0) {
+    await db.collection('participants').deleteMany({ lastStatus: { $lt: now } });
+    await db.collection("messages").insertMany(
+      removeUsers.map((user) => {
+        return {
+          from: user.name,
+          to: "Todos",
+          text: "sai da sala...",
+          type: "status",
+          time: dayjs().format("HH:mm:ss"),
+        };
+      })
+    );
+  }
+}, 15000);
+
 server.listen(5000, () => console.log(chalk.yellow("listening on port 5000")));
