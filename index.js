@@ -8,7 +8,7 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 dotenv.config();
 
-//CONFIGURATIONS
+//CONFIGURATIONS 
 const server = express();
 server.use(cors());
 server.use(json());
