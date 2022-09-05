@@ -76,6 +76,8 @@ server.post("/participants", async (req, res) => {
       ...participant,
       lastStatus: Date.now(),
     });
+
+    await db.collection("messages").insertOne({ ...registerUserMessage });
     res.sendStatus(201);
   } catch (error) {
     res.status(500).send(error.message);
@@ -93,18 +95,42 @@ server.post("/participants", async (req, res) => {
 server.get("/messages", async (req, res) => {
   const limit = parseInt(req.query.limit);
 
+  const { user } = req.headers;
+
+  let messages = [];
+
   try {
     if (limit) {
-      const messages = await db
+      messages = await db
         .collection("messages")
         .find({ limit, sort: { time: -1 } })
         .toArray();
       res.send([...messages].reverse());
+    } else {
+      messages = await db.collection("messages").find().toArray();
+      res.send(messages);
     }
 
-    const messages = await db.collection("messages").find().toArray();
-    res.send(messages);
-    
+    const filteredMessages = messages.filter((message) => {
+      if (
+        message.type === "private_message" &&
+        (message.to === user || message.from === user)
+      ) {
+        return true;
+      } else if (message.type === "message") {
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    if (limit) {
+      res.send([...filteredMessages].reverse());
+    } else {
+      return res.send(filteredMessages);
+    }
+
+    res.send(filteredMessages);
   } catch (error) {
     res.status(500).send(error.message);
   }
