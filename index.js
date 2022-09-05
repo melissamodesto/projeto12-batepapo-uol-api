@@ -91,9 +91,20 @@ server.post("/participants", async (req, res) => {
 });
 
 server.get("/messages", async (req, res) => {
+  const limit = parseInt(req.query.limit);
+
   try {
+    if (limit) {
+      const messages = await db
+        .collection("messages")
+        .find({ limit, sort: { time: -1 } })
+        .toArray();
+      res.send([...messages].reverse());
+    }
+
     const messages = await db.collection("messages").find().toArray();
     res.send(messages);
+    
   } catch (error) {
     res.status(500).send(error.message);
   }
