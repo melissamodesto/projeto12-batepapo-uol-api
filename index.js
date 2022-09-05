@@ -195,7 +195,7 @@ server.post("/status", async (req, res) => {
     return res.sendStatus(404);
   }
 
-  await db.collection("participantes").updateOne(
+  await db.collection("participants").updateOne(
     {
       name: user,
     },
@@ -208,7 +208,7 @@ server.post("/status", async (req, res) => {
 (function checkActiveUsers() {
   setInterval(async () => {
     await db
-      .collection("participantes")
+      .collection("participants")
       .find()
       .forEach(async (user) => {
         if (Date.now() - user.lastStatus >= 10000) {
