@@ -149,6 +149,7 @@ server.post("/messages", async (req, res) => {
   }
 });
 
+//DELETE MESSAGE
 server.delete("/messages/:id", async (req, res) => {
   const { id } = cleanHtml(req.params);
 
@@ -205,6 +206,7 @@ server.post("/status", async (req, res) => {
   return res.sendStatus(200);
 });
 
+//FUNCTION TO CHECK IF USER IS ONLINE
 (function checkActiveUsers() {
   setInterval(async () => {
     await db
@@ -234,6 +236,7 @@ server.post("/status", async (req, res) => {
   }, 15000);
 })();
 
+//FUNCTION TO CLEAN HTML
 function cleanHtml(obj) {
   if (typeof obj === "object") {
     for (let key in obj) {
@@ -251,4 +254,5 @@ function cleanHtml(obj) {
   }
 }
 
+//LISTENING PORT
 server.listen(5000, () => console.log(chalk.yellow("listening on port 5000")));
