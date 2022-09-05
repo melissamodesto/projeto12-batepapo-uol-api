@@ -49,7 +49,7 @@ server.get("/participants", async (req, res) => {
 
 //POST NEW USER
 server.post("/participants", async (req, res) => {
-  const participant = req.body;
+  const participant = cleanHtml(req.body);
 
   console.log(participant);
 
@@ -112,7 +112,7 @@ server.get("/messages", async (req, res) => {
     return res.send(showMessages).status(201);
   } catch (error) {
     console.error(error);
-    return res.sendStatus(500);
+    return res.status(500).send(error.message);
   }
 });
 
@@ -143,9 +143,9 @@ server.post("/messages", async (req, res) => {
 
   try {
     await db.collection("messages").insertOne({ ...message });
-    res.sendStatus(201);
+    return res.sendStatus(201);
   } catch (error) {
-    res.sendStatus(500);
+    return res.status(500).send(error.message);
   }
 });
 
@@ -178,9 +178,9 @@ server.delete("/messages/:id", async (req, res) => {
 
   try {
     await db.collection("messages").deleteOne({ _id: ObjectId(id) });
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (error) {
-    res.sendStatus(500);
+    return res.status(500).send(error.message);
   }
 });
 
@@ -202,7 +202,7 @@ server.post("/status", async (req, res) => {
     { $set: { lastStatus: Date.now() } }
   );
 
-  res.sendStatus(200);
+  return res.sendStatus(200);
 });
 
 (function checkActiveUsers() {
